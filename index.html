@@ -365,10 +365,10 @@
             audio.pause();
           } else {
             if (api.timePosition == 0) {
-              if (delay < 0) {
+              if (delay > 0) {
                 audio.play();
                 setTimeout(() => { api.playPause(); }, delay);
-              } else if (delay > 0) {
+              } else if (delay < 0) {
                 api.playPause()
                 setTimeout(() => { audio.play(); }, delay);
               } else {
