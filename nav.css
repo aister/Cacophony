@@ -1,0 +1,33 @@
+body {
+  margin: 0;
+  background: #cdcdcd;
+}
+#nav {
+  width: 100%;
+  display: flex;
+  height: 60px;
+  background: #292929;
+  align-items: center;
+}
+#logo {
+  display: flex;
+  padding: 5px;
+}
+#logo img {
+  height: 40px;
+  padding: 10px 20px;
+}
+.nav {
+  color: white;
+  height: 60px;
+  padding: 0 40px;
+  text-decoration: none;
+  align-content: center;
+}
+.nav:hover {
+  background: #676767;
+}
+#content {
+  max-width: 600px;
+  margin: 0 auto;
+}
