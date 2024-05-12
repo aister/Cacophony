@@ -8,6 +8,43 @@ body {
   height: 60px;
   background: #292929;
   align-items: center;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+#menu {
+  cursor: pointer;
+}
+#menu.active, #setting.active {
+  background: #676767;
+}
+#menu img {
+  height: 30px;
+  padding: 13px 15px;
+}
+#menuContent, #settingContent {
+  position: absolute;
+  background: #575757;
+  top: 60px;
+  display: none;
+  z-index: 1001;
+}
+#menuContent {
+  flex-direction: column;
+  left: 0;
+}
+#menu.active #menuContent, #settingContent.active {
+  display: flex;
+}
+.nav {
+  color: white;
+  height: 60px;
+  width: 200px;
+  text-decoration: none;
+  align-content: center;
+  padding-left: 15px;
+}
+.nav:hover {
+  background: #676767;
 }
 #logo {
   display: flex;
@@ -16,16 +53,6 @@ body {
 #logo img {
   height: 40px;
   padding: 10px 20px;
-}
-.nav {
-  color: white;
-  height: 60px;
-  padding: 0 40px;
-  text-decoration: none;
-  align-content: center;
-}
-.nav:hover {
-  background: #676767;
 }
 #content {
   max-width: 600px;

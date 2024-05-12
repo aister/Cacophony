@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <title>Cacophony - For your practice needs</title>    
     
-    <script src="./alphaTab.js" crossorigin="use-credentials"></script>
+    <script src="https://aister.github.io/Cacophony/alphaTab.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tocktimer/1.0.12/tock.min.js"></script>
     <script src="./jszip.min.js"></script>
     <link rel="stylesheet" href="./nav.css">
 
@@ -30,25 +31,73 @@
         height: 60px;
         bottom: 0;
         display: flex;
+        justify-content: center;
       }
-      #mainControl, #subControl {
+      #setting {
+        cursor: pointer;
+      }
+      #settingContent {
+        right: 0;
+        width: 300px;
+        flex-wrap: wrap;
+        color: white;
+      }
+      #settingContent .active {
+        background: #196f19;
+      }
+      #settingContent .active:hover {
+        background: #164116;
+      }
+      .setting-col3 {
+        width: calc(100% / 3);
+        text-align: center;
+        cursor: pointer;
+      }
+      .setting-col3:hover {
+        background: #414141;
+      }
+      #volumeSlider, #metronomeSlider {
+        align-self: center;
+      }
+      #settingContent .slider {
+        width: 230px;
+      }
+      #setting img, #settingContent img {
+        height: 20px;
+        padding: 18px 20px;
+      }
+      .settingText {
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        width: 130px;
+        margin: 10px;
       }
-      .control {
-        padding: 13px 15px;
+      .settingText.fullWidth {
+        width: 100%;
       }
-      #mainControl img {
+      .settingText input, .settingText select {
+        padding: 5px 10px;
+        width: 100%;
+      }
+      .settingText input {
+        width: calc(100% - 24px);
+      }
+      #footer div {
+        display: flex;
+        cursor: pointer;
+      }
+      #footer img {
+        height: 24px;
+        padding: 18px;
+      }
+      #footer #playPause img {
         height: 30px;
+        padding: 15px;
       }
-      #subControl img {
-        height: 25px;
-        padding: 2.5px 0px;
+      #previous img {
+        transform: rotate(180deg);
       }
-      #subControl .control.active {
-        background: #065d15;
-      }
-      .control .pause {
+      .pause {
         display: none;
       }
       .playing .pause {
@@ -56,33 +105,6 @@
       }
       .playing .play {
         display: none;
-      }
-      #volume {
-        display: flex;
-        align-items: center;
-      }
-      #volumeOn {
-        position: absolute;
-      }
-      #volume.muted #volumeOn {
-        display: none;
-      }
-      #volumeSlider {
-        margin-left: -25px;
-      }
-      .control select {
-        margin-left: 5px;
-        padding: 5px;
-      }
-      #delay {
-        width: 70px;
-        padding: 5px;
-      }
-      #speedSelector {
-        width: 70px;
-      }
-      #trackSelector {
-        width: 130px;
       }
       .at-cursor-bar {
         /* Defines the color of the bar background when a bar is played */
@@ -109,52 +131,54 @@
         width: 50%;
         margin: 10px auto;
       }
-      .fileSelectorInput {
+      .fsInput {
         display: flex;
         padding: 10px;
       }
-      .fileSelectorInput span {
+      .fsInput input[type="number"] {
+        margin-right: 10px;
+        width: 60px;
+      }
+      .fsInput span {
         width: 100px;
       }
-      .fileSelectorSeparator {
+      .fsLine {
         border-bottom: 1px solid gray;
         margin: 10px 0;
       }
-      .fileSelectorText {
+      .fsText {
         padding: 10px;
       }
-      .fileSelectorInput button {
+      .fsInput button {
         width: 40%;
         margin: 0 5%;
         padding: 10px 0;
+      }
+      .fsLabel {
+        margin: 0 auto;
+        margin-top: -19px;
+        background: #cdcdcd;
+        padding: 0 5px;
+        width: fit-content;
       }
     </style>
 
 </head>
 <body>
-    <div id="nav"></div>
-
-    <div id="wrapper" class="hidden"><div id="alphaTab" data-player="./src/lib/alphaSynth/default.sf2" data-player-offset="[-10, -70]"></div></div>
-    <div id="footer" class="hidden">
-      <div id="mainControl">
-        <audio id="audio"></audio>
-        <div id="open" class="control"><img src="./img/open.png"></div>
-        <div id="playPause" class="control">
-          <img class="play" src="./img/play.png">
-          <img class="pause" src="./img/pause.png">
-        </div>
+    <div id="nav">
+      <div id="setting">
+        <img src="./img/setting.png">
       </div>
-      <div id="subControl">
-        <div id="looping" class="control"><img src="./img/loop.png"></div>
-        <div id="volume" class="control">
-          <img src="./img/volume-base.png">
-          <img id="volumeOn" src="./img/volume.png">
-        </div>
-        <div id="volumeSlider" class="control">
-          <input type="range" min="0" max="100" value="50" class="slider" id="volumeValue">
-        </div>
-        <div class="control">
-          <span>Speed</span>
+      <div id="settingContent">
+        <div class="setting-col3" id="open" title="Load files"><img src="./img/open.png"></div>
+        <div class="setting-col3" id="looping" title="Toggle looping"><img src="./img/loop.png"></div>
+        <div class="setting-col3" id="countin"></div>
+        <div id="volume" title="Change audio volume"><img src="./img/volume.png"></div>
+        <div id="volumeSlider"><input type="range" min="0" max="100" value="50" class="slider" id="volumeValue" title="0%"></div>
+        <div id="metronome" title="Change metronome volume"><img src="./img/metronome.png"></div>
+        <div id="metronomeSlider"><input type="range" min="0" max="100" value="0" class="slider" id="metronomeValue" title="0%"></div>
+        <div class="settingText">
+          Speed
           <select id="speedSelector">
             <option value="0.25">x0.25</option>
             <option value="0.5">x0.5</option>
@@ -169,30 +193,42 @@
             <option value="2">x2.0</option>
           </select>
         </div>
-        <div class="control">
-          <span>Delay</span>
-          <input type="number" id="delay">
-        </div>
-        <div class="control">
-          <span>Tracks</span>
-          <select id="trackSelector"></select>
-        </div>
+        <div class="settingText">Delay<input type="number" id="delay"></div>
+        <div class="settingText fullWidth">Tracks<select id="trackSelector"></select></div>
+      </div>
+    </div>
+
+    <div id="wrapper" class="hidden"><div id="alphaTab" data-player="./src/lib/alphaSynth/default.sf2" data-player-offset="[-10, -70]"></div></div>
+    <div id="footer" class="hidden">
+      <audio id="audio"></audio>
+      <div id="previous" title="Previous bar (Left arrow)" onclick="prev()">
+        <img src="./img/next.png">
+      </div>
+      <div id="playPause" title="Play/Pause (space)">
+        <img class="play" src="./img/play.png">
+        <img class="pause" src="./img/pause.png">
+      </div>
+      <div id="next" title="Next bar (Right arrow)" onclick="next()">
+        <img src="./img/next.png">
       </div>
     </div>
     <div id="fileSelector">
-      <div class="fileSelectorInput"><span>Import ZIP</span><input type="file" id="zipFile" accept=".zip"></div>
-      <div class="fileSelectorSeparator"></div>
-      <div class="fileSelectorInput"><span>Sheet</span><input type="file" id="sheetFile" accept=".gp3,.gp4,.gp5,.gpx,.gp,.xml,.cap"></div>
-      <div class="fileSelectorInput"><span>Audio</span><input type="file" id="audioFile" accept=".mp3,.ogg"></div>
-      <div class="fileSelectorInput"><span>Delay</span><input type="number" id="delaySetting"></div>
-      <div class="fileSelectorInput"><span>Volume</span><input type="number" min="0" max="100" id="volumeSetting"></div>
-      <div class="fileSelectorSeparator"></div>
-      <div class="fileSelectorInput">
+      <div class="fsInput"><span>Import ZIP</span><input type="file" id="zipFile" accept=".zip"></div>
+      <div class="fsLine"></div>
+      <div class="fsLabel">OR</div>
+      <div class="fsInput"><span>Sheet</span><input type="file" id="sheetFile" accept=".gp3,.gp4,.gp5,.gpx,.gp,.xml,.cap"></div>
+      <div class="fsInput"><span>Audio</span><input type="file" id="audioFile" accept=".mp3,.ogg"></div>
+      <div class="fsInput"><span>Delay</span><input type="number" id="delaySetting" value="0">ms</div>
+      <div class="fsInput"><span>Volume</span><input type="number" min="0" max="100" value="100" id="volumeSetting">%</div>
+      <div class="fsLine"></div>
+      <div class="fsInput">
         <button id="import">Import</button>
         <button id="export">Export ZIP</button>
+        <button id="clear">Clear Form</button>
+        <a id="download" class="hidden"></a>
       </div>
-      <div class="fileSelectorSeparator"></div>
-      <div class="fileSelectorText">
+      <div class="fsLine"></div>
+      <div class="fsText">
         <span>Supported files:</span>
         <ul>
           <li>Guitar Pro 3-5 files (.gp3, .gp4, .gp5)</li>
@@ -211,7 +247,6 @@
         audio: false
       }
       const trackSelectorDiv = document.querySelector("#trackSelector");
-      const currentTrackDiv = document.querySelector("#currentTrack");
       const playPauseDiv = document.querySelector("#playPause");
       const importZip = document.querySelector("#zipFile");
       const importSheet = document.querySelector("#sheetFile");
@@ -224,6 +259,8 @@
       const speedSelectorDiv = document.querySelector("#speedSelector");
       const volumeDiv = document.querySelector("#volume");
       const volumeValueDiv = document.querySelector("#volumeValue");
+      const metronomeDiv = document.querySelector("#metronome");
+      const metronomeValueDiv = document.querySelector("#metronomeValue");
       const delayDiv = document.querySelector("#delay");
       const audio = document.querySelector("#audio");        
       const at = document.querySelector('#alphaTab');
@@ -231,10 +268,12 @@
 
       let delay = 0;
 
+      audio.onerror = console.log;
+
       api = new alphaTab.AlphaTabApi(at, {
         player: { 
           enablePlayer: true,
-          //soundFont: 'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2',
+          soundFont: 'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2',
           scrollElement: wrapper
         }
       });
@@ -244,6 +283,7 @@
       })
       api.renderFinished.on(() => {
         loaded.sheet = true;
+        api.changeTrackVolume(api.score.tracks, 0);
       });
       api.scoreLoaded.on(() => {
         trackSelectorDiv.innerHTML = "";
@@ -298,7 +338,11 @@
           volume: importVolume.value
         }));
         zip.generateAsync({type: "blob"}).then(blob => {
-          saveAs(blob, importSheet.files[0].name.replace(/\.[^.]+$/, ".zip"));
+          let link = document.querySelector("#download");
+          link.download = importSheet.files[0].name.replace(/\.[^.]+$/, ".zip");
+          link.href = window.URL.createObjectURL(blob);
+          link.click();
+          window.URL.revokeObjectURL(blob);
         })
       }
       importBtn.onclick = () => {
@@ -322,8 +366,8 @@
           delay = parseInt(importDelay.value);
           delayDiv.value = importDelay.value;
 
-          audio.volume = importVolume.value / 100;
-          volumeValueDiv.value = importVolume.value;
+          audio.volume = parseInt(importVolume.value) / 100;
+          volumeValueDiv.value = audio.volume;
 
           let fr = new FileReader();
           fr.onload = () => { load([fr.result, importAudio.files[0]]) }
@@ -343,34 +387,41 @@
         wrapper.classList.remove("hidden");
         document.querySelector("#footer").classList.remove("hidden");
         api.load(data[0]);
-        audio.src = window.URL.createObjectURL(data[1]);
-      }
-      volumeDiv.onclick = () => {
-        volumeDiv.classList.toggle("muted");
-        volumeValueDiv.disabled = volumeDiv.classList.contains("muted");
-        audio.muted = volumeDiv.classList.contains("muted");
+        audio.src = URL.createObjectURL(data[1]);
       }
       volumeValueDiv.onchange = () => {
         audio.volume = volumeValueDiv.value / 100;
+        volumeValueDiv.title = `${volumeValueDiv.value}%`;
+      }
+      metronomeValueDiv.onchange = () => {
+        api.metronomeVolume = metronomeValueDiv.value / 100;
+        metronomeValueDiv.title = `${metronomeValueDiv.value}%`;
       }
       audio.oncanplaythrough = () => {
         loaded.audio = true;
       }
       function getAccurateTime(midiTick) { return midiTick * 60000 / (87 * 960) }
       function play() {
-        console.log('a');
         if (loaded.sheet && loaded.audio) {
           if (api.playerState) {
             api.playPause();
             audio.pause();
           } else {
-            if (api.timePosition == 0) {
+            if (api.timePosition == 0 && audio.currentTime == 0) {
               if (delay > 0) {
                 audio.play();
-                setTimeout(() => { api.playPause(); }, delay);
+                let timer = new Tock({
+                  countdown: true,
+                  complete: () => { api.playPause(); }
+                });
+                timer.start(delay);
               } else if (delay < 0) {
-                api.playPause()
-                setTimeout(() => { audio.play(); }, delay);
+                api.playPause();
+                let timer = new Tock({
+                  countdown: true,
+                  complete: () => { audio.play(); }
+                });
+                timer.start(delay);
               } else {
                 audio.play();
                 api.playPause();
@@ -383,23 +434,39 @@
           }
         }
       }
+      
+      const setting = document.querySelector("#setting");
+      setting.onclick = () => { if (loaded.sheet && loaded.audio) document.querySelector("#settingContent").classList.toggle("active"); }
+
+      document.querySelector("#clear").onclick = () => {
+        if (confirm("Are you sure you want to clear all fields?")) {
+          importZip.value = "";
+          importSheet.value = "";
+          importAudio.value = "";
+          importDelay.value = 0;
+          importVolume.value = 100;
+        }
+      }
       document.onkeydown = e => { 
         if (loaded.audio && loaded.sheet) {
           if (e.code == "Space") play();
-          else if (e.code == "ArrowLeft") {
-            let currentMasterBar = api._currentBeat.currentBeatLookup.masterBar.masterBar;
-            if (currentMasterBar.previousMasterBar) currentMasterBar = currentMasterBar.previousMasterBar.start;
-            else currentMasterBar = currentMasterBar.start;
-            api.tickPosition = currentMasterBar;
-            audio.currentTime = (getAccurateTime(api.tickPosition) + delay) / 1000;
-          }
-          else if (e.code == "ArrowRight") {
-            let currentMasterBar = api._currentBeat.currentBeatLookup.masterBar;
-            if (currentMasterBar.nextMasterBar) currentMasterBar = currentMasterBar.nextMasterBar.start;
-            else currentMasterBar = currentMasterBar.start;
-            api.tickPosition = currentMasterBar;
-            audio.currentTime = (getAccurateTime(api.tickPosition) + delay) / 1000;}
+          else if (e.code == "ArrowLeft") prev();
+          else if (e.code == "ArrowRight") next();
         }
+      }
+      function prev() {
+        let currentMasterBar = api._currentBeat.currentBeatLookup.masterBar.masterBar;
+        if (currentMasterBar.previousMasterBar) currentMasterBar = currentMasterBar.previousMasterBar.start;
+        else currentMasterBar = currentMasterBar.start;
+        api.tickPosition = currentMasterBar;
+        audio.currentTime = (getAccurateTime(api.tickPosition) + delay) / 1000;
+      }
+      function next() {
+        let currentMasterBar = api._currentBeat.currentBeatLookup.masterBar;
+        if (currentMasterBar.nextMasterBar) currentMasterBar = currentMasterBar.nextMasterBar.start;
+        else currentMasterBar = currentMasterBar.start;
+        api.tickPosition = currentMasterBar;
+        audio.currentTime = (getAccurateTime(api.tickPosition) + delay) / 1000;
       }
     </script>
     <script src="./nav.js"></script>
