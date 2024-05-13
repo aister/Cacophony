@@ -275,25 +275,28 @@
       const playbackTo = document.querySelector("#playbackTo");
 
       let delay = 0;
-      let doubleclickPrev = {};
-      let playbackChangeTimeout;
+      let playbackChangeManual = true;
 
       audio.onerror = console.log;
-
-      if (window.innerWidth <= 600) {
-        rotate.style.height = window.innerWidth + "px";
-        rotate.style.width = (window.innerHeight - 120) + "px";
-      }
-      api = new alphaTab.AlphaTabApi(at, {
+      let apiSetting = {
         player: { 
           enablePlayer: true,
           soundFont: 'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2',
-          scrollElement: wrapper
+          scrollElement: wrapper,
+          nativeBrowserSmoothScroll: false,
+          scrollOffsetX: -200
         },
         display: { 
           layoutMode: 1 
         }
-      });
+      }
+
+      if (window.innerWidth <= 600) {
+        rotate.style.height = window.innerWidth + "px";
+        rotate.style.width = (window.innerHeight - 120) + "px";
+        apiSetting.player.scrollOffsetX = 0;
+      }
+      api = new alphaTab.AlphaTabApi(at, apiSetting);
 
       api.renderStarted.on(() => {
         loaded.sheet = false;
@@ -312,32 +315,14 @@
           trackSelectorDiv.innerHTML += `<option value="${i.index}">${i.name}</option>`
         })
       });
-      /*api.beatMouseDown.on(beat => {
-        if (!doubleclickPrev.time) {
-          doubleclickPrev.time = Date.now();
-        } else if (Math.now() - doubleclickPrev.time < 500) {
-          doubleclickPrev.value = beat.
-        }
-        playbackChangeTimeout = setTimeout(() => {
-          if (!longTouchPrev) {
-            longTouchPrev = beat.absolutePlaybackStart;
-            api.playbackRange = { startTick: longTouchPrev, endTick: longTouchPrev }
-          } else {
-            if (beat.absolutePlaybackStart > longTouchPrev) api.playbackRange = { endTick: beat.absolutePlaybackStart };
-            else if (beat.absolutePlaybackStart < longTouchPrev) api.playbackRange = { startTick: beat.absolutePlaybackStart };
-            longTouchPrev = null;
-          }
-        }, 2000);
-      })*/
       api.beatMouseUp.on(beat => {
-        clearTimeout(playbackChangeTimeout);
         audio.currentTime = (getAccurateTime(beat.absolutePlaybackStart) + delay) / 1000;
       })
       api.playbackRangeChanged.on(() => {
         if (playbackChangeManual) {
           playbackTo.value = "";
           playbackFrom.value = "";
-          playbackFrom.max = max;
+          playbackFrom.max = api.score.masterBars.length;
           playbackTo.min = 1;
         } else playbackChangeManual = true;
         api.scrollToCursor();
@@ -510,6 +495,7 @@
         else currentMasterBar = currentMasterBar.start;
         api.tickPosition = currentMasterBar;
         audio.currentTime = (getAccurateTime(api.tickPosition) + delay) / 1000;
+        api.scrollToCursor();
       }
       function next() {
         let currentMasterBar = api._currentBeat.currentBeatLookup.masterBar;
@@ -517,6 +503,7 @@
         else currentMasterBar = currentMasterBar.start;
         api.tickPosition = currentMasterBar;
         audio.currentTime = (getAccurateTime(api.tickPosition) + delay) / 1000;
+        api.scrollToCursor();
       }
       playbackFrom.onchange = () => {
         if (playbackFrom.value === "") return;
