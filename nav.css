@@ -46,10 +46,6 @@ body {
 .nav:hover {
   background: #676767;
 }
-#logo {
-  display: flex;
-  padding: 5px;
-}
 #logo img {
   height: 40px;
   padding: 10px 20px;
