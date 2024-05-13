@@ -58,3 +58,23 @@ body {
   max-width: 600px;
   margin: 0 auto;
 }
+@media screen and (max-width: 600px) {
+  #fileSelector {
+    width: 100%;
+  }
+  .rotate {
+    transform: rotate(90deg);
+    left: 100%;
+    transform-origin: top left;
+    top: auto;
+    right: auto;
+    bottom: auto;
+  }
+  #content {
+    width: calc(100% - 20px);
+    padding: 0 10px;
+  }
+  #footer div {
+    width: calc(100% / 3);
+  }
+}

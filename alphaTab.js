@@ -25341,8 +25341,14 @@
                 if (this.settings.player.enableUserInteraction) {
                     e.preventDefault();
                 }
-                let relX = e.getX(this.canvasElement);
-                let relY = e.getY(this.canvasElement);
+                let relX, relY;
+                if (window.innerWidth <= 600) {
+                    relX = e.getY(this.canvasElement);
+                    relY = e.getX(this.canvasElement);
+                } else {
+                    relX = e.getX(this.canvasElement);
+                    relY = e.getY(this.canvasElement);
+                }
                 let beat = (_b = (_a = this.renderer.boundsLookup) === null || _a === void 0 ? void 0 : _a.getBeatAtPos(relX, relY)) !== null && _b !== void 0 ? _b : null;
                 if (beat) {
                     this.onBeatMouseDown(e, beat);
@@ -25359,8 +25365,14 @@
                 if (!this._beatMouseDown) {
                     return;
                 }
-                let relX = e.getX(this.canvasElement);
-                let relY = e.getY(this.canvasElement);
+                let relX, relY;
+                if (window.innerWidth <= 600) {
+                    relX = e.getY(this.canvasElement);
+                    relY = e.getX(this.canvasElement);
+                } else {
+                    relX = e.getX(this.canvasElement);
+                    relY = e.getY(this.canvasElement);
+                }
                 let beat = (_b = (_a = this.renderer.boundsLookup) === null || _a === void 0 ? void 0 : _a.getBeatAtPos(relX, relY)) !== null && _b !== void 0 ? _b : null;
                 if (beat) {
                     this.onBeatMouseMove(e, beat);
@@ -25380,8 +25392,14 @@
                 if (this.settings.player.enableUserInteraction) {
                     e.preventDefault();
                 }
-                let relX = e.getX(this.canvasElement);
-                let relY = e.getY(this.canvasElement);
+                let relX, relY;
+                if (window.innerWidth <= 600) {
+                    relX = e.getY(this.canvasElement);
+                    relY = e.getX(this.canvasElement);
+                } else {
+                    relX = e.getX(this.canvasElement);
+                    relY = e.getY(this.canvasElement);
+                }
                 let beat = (_b = (_a = this.renderer.boundsLookup) === null || _a === void 0 ? void 0 : _a.getBeatAtPos(relX, relY)) !== null && _b !== void 0 ? _b : null;
                 this.onBeatMouseUp(e, beat);
                 if (this._noteMouseDown) {

@@ -3,21 +3,17 @@
 <head>
     <meta charset="utf-8">
     <title>Cacophony - For your practice needs</title>    
-    
-    <script src="https://aister.github.io/Cacophony/alphaTab.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="./alphaTab.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tocktimer/1.0.12/tock.min.js"></script>
     <script src="./jszip.min.js"></script>
-    <link rel="stylesheet" href="./nav.css">
 
     <style>
       #wrapper {
         overflow-y: auto;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        right: 0;
-        bottom: 60px;
         background: #cdcdcd;
+        width: 100%;
+        height: 100%;
       }
       .hidden {
         display: none !important;
@@ -82,9 +78,17 @@
       .settingText input {
         width: calc(100% - 24px);
       }
+      .rotate {
+        top: 60px;
+        bottom: 60px;
+        left: 0;
+        right: 0;
+        position: absolute;
+      }
       #footer div {
         display: flex;
         cursor: pointer;
+        justify-content: center;
       }
       #footer img {
         height: 24px;
@@ -128,7 +132,7 @@
         stroke: #0078ff;
       }
       #fileSelector {
-        width: 50%;
+        width: 600px;
         margin: 10px auto;
       }
       .fsInput {
@@ -162,7 +166,7 @@
         width: fit-content;
       }
     </style>
-
+    <link rel="stylesheet" href="./nav.css">
 </head>
 <body>
     <div id="nav">
@@ -195,10 +199,14 @@
         </div>
         <div class="settingText">Delay<input type="number" id="delay"></div>
         <div class="settingText fullWidth">Tracks<select id="trackSelector"></select></div>
+        <div class="settingText">Play from bar...<input type="number" id="playbackFrom" value="1" min="1"></div>
+        <div class="settingText">...to bar<input type="number" id="playbackTo" value="1" min="1"></div>
       </div>
     </div>
 
-    <div id="wrapper" class="hidden"><div id="alphaTab" data-player="./src/lib/alphaSynth/default.sf2" data-player-offset="[-10, -70]"></div></div>
+    <div class="rotate hidden">
+      <div id="wrapper"><div id="alphaTab" data-player="./src/lib/alphaSynth/default.sf2" data-player-offset="[-10, -70]"></div></div>
+    </div>
     <div id="footer" class="hidden">
       <audio id="audio"></audio>
       <div id="previous" title="Previous bar (Left arrow)" onclick="prev()">
@@ -253,28 +261,37 @@
       const importAudio = document.querySelector("#audioFile");
       const importDelay = document.querySelector("#delaySetting");
       const importVolume = document.querySelector("#volumeSetting");
-      const importBtn = document.querySelector("#import");
-      const exportBtn = document.querySelector("#export");
       const loopDiv = document.querySelector("#looping");
       const speedSelectorDiv = document.querySelector("#speedSelector");
-      const volumeDiv = document.querySelector("#volume");
       const volumeValueDiv = document.querySelector("#volumeValue");
-      const metronomeDiv = document.querySelector("#metronome");
       const metronomeValueDiv = document.querySelector("#metronomeValue");
       const delayDiv = document.querySelector("#delay");
       const audio = document.querySelector("#audio");        
       const at = document.querySelector('#alphaTab');
       const wrapper = document.querySelector("#wrapper");
+      const rotate = document.querySelector(".rotate");
+      const fs = document.querySelector("#fileSelector");
+      const playbackFrom = document.querySelector("#playbackFrom");
+      const playbackTo = document.querySelector("#playbackTo");
 
       let delay = 0;
+      let doubleclickPrev = {};
+      let playbackChangeTimeout;
 
       audio.onerror = console.log;
 
+      if (window.innerWidth <= 600) {
+        rotate.style.height = window.innerWidth + "px";
+        rotate.style.width = (window.innerHeight - 120) + "px";
+      }
       api = new alphaTab.AlphaTabApi(at, {
         player: { 
           enablePlayer: true,
           soundFont: 'https://cdn.jsdelivr.net/npm/@coderline/alphatab@latest/dist/soundfont/sonivox.sf2',
           scrollElement: wrapper
+        },
+        display: { 
+          layoutMode: 1 
         }
       });
 
@@ -286,13 +303,44 @@
         api.changeTrackVolume(api.score.tracks, 0);
       });
       api.scoreLoaded.on(() => {
+        let max = api.score.masterBars.length;
+        playbackFrom.max = max;
+        playbackTo.max = max;
+        playbackTo.value = max;
         trackSelectorDiv.innerHTML = "";
         api.score.tracks.forEach(i => { 
           trackSelectorDiv.innerHTML += `<option value="${i.index}">${i.name}</option>`
         })
       });
+      /*api.beatMouseDown.on(beat => {
+        if (!doubleclickPrev.time) {
+          doubleclickPrev.time = Date.now();
+        } else if (Math.now() - doubleclickPrev.time < 500) {
+          doubleclickPrev.value = beat.
+        }
+        playbackChangeTimeout = setTimeout(() => {
+          if (!longTouchPrev) {
+            longTouchPrev = beat.absolutePlaybackStart;
+            api.playbackRange = { startTick: longTouchPrev, endTick: longTouchPrev }
+          } else {
+            if (beat.absolutePlaybackStart > longTouchPrev) api.playbackRange = { endTick: beat.absolutePlaybackStart };
+            else if (beat.absolutePlaybackStart < longTouchPrev) api.playbackRange = { startTick: beat.absolutePlaybackStart };
+            longTouchPrev = null;
+          }
+        }, 2000);
+      })*/
       api.beatMouseUp.on(beat => {
+        clearTimeout(playbackChangeTimeout);
         audio.currentTime = (getAccurateTime(beat.absolutePlaybackStart) + delay) / 1000;
+      })
+      api.playbackRangeChanged.on(() => {
+        if (playbackChangeManual) {
+          playbackTo.value = "";
+          playbackFrom.value = "";
+          playbackFrom.max = max;
+          playbackTo.min = 1;
+        } else playbackChangeManual = true;
+        api.scrollToCursor();
       })
       api.playerStateChanged.on(args => {
         if (args.state) playPauseDiv.classList.add("playing");
@@ -318,7 +366,8 @@
         api.isLooping = loopDiv.classList.contains("active");
       }
       document.querySelector("#open").onclick = () => {
-        wrapper.classList.toggle("hidden");
+        rotate.classList.toggle("hidden");
+        fs.classList.toggle("hidden");
       }
       speedSelectorDiv.onchange = () => {
         api.playbackSpeed = speedSelectorDiv.value;
@@ -326,7 +375,7 @@
         audio.currentTime = (api.timePosition + delay) / 1000;
       }
       delayDiv.onchange = () => { delay = parseInt(delayDiv.value) }
-      exportBtn.onclick = () => {
+      document.querySelector("#export").onclick = () => {
         if (!importSheet.files.length) return error("Sheet file not found");
         if (!importAudio.files.length) return error("Audio file not found");
 
@@ -345,7 +394,7 @@
           window.URL.revokeObjectURL(blob);
         })
       }
-      importBtn.onclick = () => {
+      document.querySelector("#import").onclick = () => {
         if (importZip.files.length) {
           JSZip.loadAsync(importZip.files[0]).then(zip => {
             let sheetFile = zip.file(/\.gp3|\.gp4|\.gp5|\.gpx|\.gp|\.xml|\.cap/)[0];
@@ -384,7 +433,8 @@
           audio.volume = config.volume / 100;
           volumeValueDiv.value = config.volume;
         }
-        wrapper.classList.remove("hidden");
+        rotate.classList.remove("hidden");
+        fs.classList.add("hidden");
         document.querySelector("#footer").classList.remove("hidden");
         api.load(data[0]);
         audio.src = URL.createObjectURL(data[1]);
@@ -467,6 +517,29 @@
         else currentMasterBar = currentMasterBar.start;
         api.tickPosition = currentMasterBar;
         audio.currentTime = (getAccurateTime(api.tickPosition) + delay) / 1000;
+      }
+      playbackFrom.onchange = () => {
+        if (playbackFrom.value === "") return;
+        if (!playbackTo.value) playbackTo.value = api.score.masterBars.length;
+        playbackChangeManual = false;
+        playbackTo.min = playbackFrom.value;
+        let endTick = api.score.masterBars.at(-1);
+        endTick = endTick.start + endTick.calculateDuration();
+        if (playbackTo.value) endTick = api.score.masterBars[playbackTo.value - 1].start;
+        api.playbackRange = {
+          startTick: api.score.masterBars[playbackFrom.value - 1].start,
+          endTick
+        }
+      }
+      playbackTo.onchange = () => {
+        if (playbackTo.value === "") return;
+        if (!playbackFrom.value) playbackFrom.value = 1;
+        playbackChangeManual = false;
+        playbackFrom.max = playbackTo.value;
+        let startTick = 0;
+        if (playbackFrom.value) startTick = api.score.masterBars[playbackFrom.value - 1].start;
+        let endTick = api.tracks[0].staves[0].bars[playbackTo.value - 1].voices[0].beats.at(-1).absolutePlaybackStart;
+        api.playbackRange = { startTick, endTick }
       }
     </script>
     <script src="./nav.js"></script>
